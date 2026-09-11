@@ -1,0 +1,5 @@
+'use client';
+import { ArrowRight, X } from 'lucide-react';
+import { StampButton } from '@/components/ui';
+export function LandmarkMarker({expanded,onClick}:{expanded:boolean;onClick:()=>void}) {return <button className="landmark-marker" aria-label="Tokyo, 126 experiences" aria-expanded={expanded} aria-controls="tokyo-landmark-details" onClick={onClick}><img src="/tokyo-tower.png" alt="Illustrated Tokyo Tower"/><span>126</span></button>}
+export function ExpandedLandmark({onClose}:{onClose:()=>void}) {return <section id="tokyo-landmark-details" className="expanded-landmark" aria-label="Tokyo experiences" onClick={e=>e.stopPropagation()}><button className="close-landmark" onClick={onClose} aria-label="Collapse Tokyo"><X size={20}/></button><p className="eyebrow">JAPAN · YOUR NEXT CHAPTER</p><h2>TOKYO</h2><p className="count">126 EXPERIENCES</p><div className="landmark-categories">{['Gaming','Food','Fashion','Music'].map(c=><span key={c}>{c}</span>)}</div><StampButton href="/city/tokyo">Explore Tokyo <ArrowRight size={20}/></StampButton></section>}

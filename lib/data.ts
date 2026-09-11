@@ -1,0 +1,14 @@
+import type { City, Experience, Interest } from '@/types';
+export const interests: Interest[] = ['Gaming','Fashion','Food','Cars','Music','Basketball','Art','History','Outdoors','Nightlife','Photography','Technology'].map(name => ({ id: name.toLowerCase(), name }));
+export const cities: City[] = [
+ {id:'london',name:'London',country:'United Kingdom',coordinates:[-0.1276,51.5072],experienceCount:0,categories:[]},
+ {id:'tokyo',name:'Tokyo',country:'Japan',coordinates:[139.6917,35.6895],experienceCount:126,categories:['Gaming','Food','Fashion','Music']},
+ {id:'paris',name:'Paris',country:'France',coordinates:[2.3522,48.8566],experienceCount:0,categories:[]},
+ {id:'new-york',name:'New York',country:'United States',coordinates:[-74,40.7],experienceCount:0,categories:[]}
+];
+export const experiences: Experience[] = [
+ {id:'akihabara-electric-town',cityId:'tokyo',title:'Akihabara Electric Town',category:'Gaming',duration:'2–4 hours',cost:'Free to explore',completedCount:1248,image:'/akihabara.jpg',imageAlt:'Neon signs and people crossing the street in Akihabara, Tokyo',description:'Get a little lost in Tokyo’s electric playground. Browse retro games, climb floors of arcades, and follow the neon into the side streets. This is a neighbourhood made for curiosity.',tips:[{author:'Maya',text:'Start with the side streets. The tiny retro game shops were my favourite part.'},{author:'Jamie',text:'Bring coins for the arcades, and leave some room in your bag.'}]},
+ {id:'tsukiji-food-walk',cityId:'tokyo',title:'A taste of Tsukiji',category:'Food',duration:'1–2 hours',cost:'Around ¥2,000–4,000',completedCount:846,image:'/tsukiji.jpg',imageAlt:'Food stalls and signs at Tsukiji Outer Market',description:'Follow your appetite through the market lanes, stopping for small bites and something you have never tried before.',tips:[{author:'Alex',text:'Go early and enjoy a few small bites instead of one big meal.'}]},
+ {id:'harajuku-backstreets',cityId:'tokyo',title:'Harajuku, off the main street',category:'Fashion',duration:'2–3 hours',cost:'Free to explore',completedCount:672,image:'/harajuku.jpg',imageAlt:'Shops and pedestrians on a Harajuku street in Tokyo',description:'Find independent boutiques, vintage treasures, and street style around the quieter corners of Harajuku.',tips:[{author:'Sam',text:'Take the small streets off the main drag. Give yourself time to browse.'}]},
+ {id:'shinjuku-after-dark',cityId:'tokyo',title:'Shinjuku after dark',category:'Nightlife',duration:'2–3 hours',cost:'Around ¥2,000–5,000',completedCount:932,image:'/akihabara.jpg',imageAlt:'Tokyo neon street scene used as an atmospheric illustration',description:'An evening walk through neon-lit streets, with time to stop for a bite and watch the city come alive.',tips:[{author:'Rin',text:'Check cover charges before sitting down in a small bar.'}]}
+];
