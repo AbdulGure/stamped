@@ -12,7 +12,7 @@ import './plan.css';
 const spring={type:'spring' as const,stiffness:340,damping:31};
 export default function PlanPage(){
  const [plan,setPlan]=useState<Plan|null>(null);
- const [day,setDay]=useState<number|null>(1);
+ const [day,setDay]=useState<number|null>(null);
  const [error,setError]=useState('');
  const [notice,setNotice]=useState('');
  const [busy,setBusy]=useState(false);
@@ -55,7 +55,8 @@ export default function PlanPage(){
      <AnimatePresence initial={false} mode="popLayout">
       {visible.map((item,index)=>{const e=experiences.find(ex=>ex.id===item.experienceId)!;return <motion.article layout key={item.id} className="itinerary-stop" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.97}} transition={spring}>
        <div className="stop-number" aria-label={`Stop ${index+1}`}>{String(index+1).padStart(2,'0')}</div>
-       <div className="stop-card"><Link href={`/experience/${e.id}`} className="stop-summary"><img src={e.image} alt={e.imageAlt} width={72} height={84} loading="lazy"/><div><span className="eyebrow">{e.category}</span><h3>{e.title}</h3><p><Clock size={12}/>{e.duration}</p></div></Link>
+       <div className="stop-card"><Link href={`/experience/${e.id}`} className="stop-summary"><img src={e.image} alt={e.imageAlt} width={72} height={84} loading="lazy"/><div><span className="eyebrow">{e.category}</span><h3>{e.title}</h3><p><Clock size={12}/>{e.duration} · Tokyo</p></div></Link>
+        <div className="plan-completion"><span>{item.status==='completed'?'✓ COMPLETED':'PLANNED'}</span><Link href={item.status==='completed'?`/passport/tokyo/${e.id}`:`/stamp/${e.id}`}>{item.status==='completed'?'VIEW MEMORY →':'MARK AS COMPLETE →'}</Link></div>
         <div className="stop-tools"><label><span className="sr-only">Day for {e.title}</span><select disabled={busy} value={item.day??''} onChange={event=>{const next=event.target.value?Number(event.target.value):null;void update(()=>repository.setItemDay(e.id,next),`${e.title} moved to ${next===null?'Saved':`Day ${next}`}.`);}}><option value="">Saved · no day yet</option>{Array.from({length:plan.dayCount},(_,i)=><option value={i+1} key={i}>Day {String(i+1).padStart(2,'0')}</option>)}</select></label><div>
          <button disabled={busy||index===0} aria-label={`Move ${e.title} earlier`} onClick={()=>void update(()=>repository.moveItem(e.id,-1),'Stop moved earlier.')}><ArrowUp size={16}/></button>
          <button disabled={busy||index===visible.length-1} aria-label={`Move ${e.title} later`} onClick={()=>void update(()=>repository.moveItem(e.id,1),'Stop moved later.')}><ArrowDown size={16}/></button>

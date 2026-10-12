@@ -1,3 +1,2 @@
-import { Globe2, Plane } from 'lucide-react';
-import { BottomNav } from '@/components/ui';
-export default function Passport(){return <main className="passport-screen"><Globe2 size={43} strokeWidth={1.7}/><h1>MY PASSPORT</h1><p className="passport-preview-label">SAMPLE PASSPORT</p><div className="passport-stats"><div><strong>68</strong><span>STAMPS</span></div><div><strong>7</strong><span>CITIES</span></div><div><strong>14</strong><span>ITINERARIES</span></div></div><img className="passport-stamps" src="/passport-stamps.png" alt="Sample illustrated passport stamps for London, Tokyo, Paris, New York, Rome and Bangkok"/><div className="passport-next"><span className="empty-stamp">?</span><Plane size={31}/><p>More places.<br/>More stories.</p></div><p className="passport-note">Your own stamps will start in a future chapter.</p><BottomNav active="Passport"/></main>}
+import { PassportPage } from '@/features/stamps/passport';
+export default PassportPage;
