@@ -2,7 +2,7 @@ import type { Profile, Plan, PlanItem, Stamp, StampMemory } from '../types';
 export interface StampedRepository {
  getStamps(): Promise<Stamp[]>;
  completeExperience(experienceId: string): Promise<Stamp>;
- saveStampMemory(stampId: string, memory: StampMemory): Promise<Stamp>;
+ saveStampMemory(stampId: string, memory: StampMemory, onProgress?: (percent:number)=>void): Promise<Stamp>;
  getProfile(): Promise<Profile | null>;
  saveProfile(profile: Profile): Promise<void>;
  getPlan(): Promise<Plan>;

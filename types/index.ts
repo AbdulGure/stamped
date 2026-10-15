@@ -7,9 +7,9 @@ export interface Experience { id: string; cityId: string; title: string; categor
 export interface PlanItem { id: string; experienceId: string; addedAt: string; day?: number | null; completedAt?: string; status?: 'planned' | 'completed' }
 export interface Plan { id: string; profileId: string; items: PlanItem[]; dayCount: number }
 export interface Itinerary { id: string; cityId: string; planItemIds: string[]; date?: string }
-export interface StampPhoto { id: string; src: string; alt: string }
+export interface StampPhoto { id: string; src: string; alt: string; storagePath?: string }
 export interface Stamp {
- id: string; userId: string; experienceId: string; cityId: string; completedAt: string;
+ id: string; userId: string; experienceId: string; cityId: string; completedAt: string; cityName?: string; cityCountry?: string; experienceTitle?: string;
  rating: number | null; amountSpent: number | null; currency: 'GBP'; durationMinutes: number | null;
  tip: string; evidenceStatus: 'standard' | 'photo'; coverPhoto: string | null; photos: StampPhoto[];
 }

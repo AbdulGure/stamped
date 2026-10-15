@@ -1,2 +1,2 @@
 import { CityPassport } from '@/features/stamps/passport';
-export default CityPassport;
+export default function Page(){return <CityPassport cityId="tokyo"/>;}

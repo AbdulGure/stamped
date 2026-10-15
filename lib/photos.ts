@@ -1,5 +1,5 @@
 import type { StampPhoto } from '@/types';
-/** Downsize before persistence: localStorage is intentionally only a prototype album. */
+/** Downsize before either persistence adapter to keep mobile uploads and previews small. */
 export async function preparePhoto(file:File):Promise<StampPhoto>{
  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('Choose JPG, PNG or WebP photos. Convert HEIC photos to JPG first.');
  if(file.size>20*1024*1024)throw new Error('Choose photos smaller than 20 MB each.');
@@ -12,7 +12,7 @@ export async function preparePhoto(file:File):Promise<StampPhoto>{
   ctx.fillStyle='#fffaf1';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
   let quality=.78,src=canvas.toDataURL('image/jpeg',quality);
   while(src.length>240000&&quality>.25){quality-=.1;src=canvas.toDataURL('image/jpeg',quality);}
-  if(src.length>240000)throw new Error('This photo is too detailed for local storage. Try a smaller image.');
-  return {id:typeof crypto.randomUUID==='function'?crypto.randomUUID():`photo-${Date.now()}-${Array.from(crypto.getRandomValues(new Uint32Array(2))).join('-')}`,src,alt:file.name.replace(/\.[^.]+$/,'').slice(0,100)||'My Tokyo memory'};
+  if(src.length>240000)throw new Error('This photo is too detailed to prepare. Try a smaller image.');
+  return {id:typeof crypto.randomUUID==='function'?crypto.randomUUID():`photo-${Date.now()}-${Array.from(crypto.getRandomValues(new Uint32Array(2))).join('-')}`,src,alt:file.name.replace(/\.[^.]+$/,'').slice(0,100)||'My travel memory'};
  }finally{URL.revokeObjectURL(url);}
 }

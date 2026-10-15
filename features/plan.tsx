@@ -1,10 +1,12 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { memoryHref } from '@/lib/passport-links';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { ArrowRight, ArrowUp, ArrowDown, Trash2, Clock, MapPin, Plus, Check, Bookmark, X } from 'lucide-react';
 import type { Plan } from '@/types';
-import { experiences } from '@/lib/data';
+import { cloudMode } from '@/lib/supabase/config';
+import { experiences, cities } from '@/lib/data';
 import { repository, announcePlanChange } from '@/lib/store';
 import { Header, BottomNav } from '@/components/ui';
 import './plan.css';
@@ -21,7 +23,7 @@ export default function PlanPage(){
  const addButton=useRef<HTMLButtonElement>(null);
  useEffect(()=>{
   let active=true;
-  const refresh=()=>{repository.getPlan().then(p=>{if(active){setPlan(p);setDay(d=>d!==null&&d>p.dayCount?p.dayCount:d);}}).catch(()=>{if(active)setError('Could not load your plan. Please enable browser storage and reload.');});};
+  const refresh=()=>{repository.getPlan().then(p=>{if(active){setPlan(p);setDay(d=>d!==null&&d>p.dayCount?p.dayCount:d);}}).catch(()=>{if(active)setError('Could not load your plan. Check your connection and reload.');});};
   refresh();window.addEventListener('stamped-plan-change',refresh);window.addEventListener('storage',refresh);
   return()=>{active=false;window.removeEventListener('stamped-plan-change',refresh);window.removeEventListener('storage',refresh);};
  },[]);
@@ -35,14 +37,15 @@ export default function PlanPage(){
  const visible=plan?.items.filter(item=>(item.day??null)===day)??[];
  const savedCount=plan?.items.filter(item=>item.day==null).length??0;
  const available=experiences.filter(e=>!plan?.items.some(item=>item.experienceId===e.id));
+ const tokyoOnly=!plan?.items.some(item=>experiences.find(e=>e.id===item.experienceId)?.cityId!=='tokyo');
  function closePicker(){setPicker(false);addButton.current?.focus();}
  return <MotionConfig reducedMotion="user"><main className="itinerary-page">
   <Header back="/explore" backLabel="Back to Explore"/>
   <div className="page-shell itinerary-shell">
    <header className="itinerary-title"><p className="eyebrow">LESS SOMEDAY. MORE LET’S GO.</p><h1>MAKE A<br/><span>DAY OF IT.</span></h1><span className="itinerary-doodle" aria-hidden="true">↗</span></header>
-   <section className="trip-ticket" aria-label="Tokyo trip summary"><div><span className="eyebrow"><MapPin size={13}/> JAPAN · YOUR NEXT CHAPTER</span><h2>TOKYO <span>東京</span></h2></div><div className="trip-tally"><strong>{plan?.dayCount??'—'}</strong><span>DAYS</span></div><p>Good places. Your pace.</p><span className="trip-ticket-code">TYO / 001</span></section>
+   <section className="trip-ticket" aria-label="Trip summary"><div><span className="eyebrow"><MapPin size={13}/> {tokyoOnly?'JAPAN · YOUR NEXT CHAPTER':'YOUR NEXT CHAPTER'}</span><h2>{tokyoOnly?<>TOKYO <span>東京</span></>:'YOUR TRIP'}</h2></div><div className="trip-tally"><strong>{plan?.dayCount??'—'}</strong><span>DAYS</span></div><p>Good places. Your pace.</p><span className="trip-ticket-code">{tokyoOnly?'TYO / 001':'EXP / 001'}</span></section>
    {error&&<p className="error" role="alert">{error}</p>}
-   <p className="planner-status" role="status" aria-live="polite">{busy?'Saving…':notice||'Saved on this device · no dates needed yet'}</p>
+   <p className="planner-status" role="status" aria-live="polite">{busy?'Saving…':notice||(cloudMode?'Saved to your account · no dates needed yet':'Saved on this device · no dates needed yet')}</p>
    {!plan&&!error&&<div className="planner-loading" role="status">Unfolding your itinerary…<div/><div/></div>}
    {plan&&<>
     <div className="trip-days" aria-label="Choose a trip day">
@@ -53,10 +56,10 @@ export default function PlanPage(){
     <div className="day-heading"><div><p className="eyebrow">{day===null?'KEEP A LITTLE INSPIRATION':'LEAVE ROOM FOR A DETOUR'}</p><h2>{day===null?'THE SHORTLIST.':`DAY ${String(day).padStart(2,'0')}.`}</h2></div><span>{visible.length} {visible.length===1?'stop':'stops'}</span></div>
     <div className="itinerary-stops" aria-label={day===null?'Unscheduled experiences':`Day ${day} experiences`}>
      <AnimatePresence initial={false} mode="popLayout">
-      {visible.map((item,index)=>{const e=experiences.find(ex=>ex.id===item.experienceId)!;return <motion.article layout key={item.id} className="itinerary-stop" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.97}} transition={spring}>
+      {visible.map((item,index)=>{const e=experiences.find(ex=>ex.id===item.experienceId);if(!e)return <p key={item.id}>A saved experience needs a newer app version. Your plan data is kept.</p>;return <motion.article layout key={item.id} className="itinerary-stop" initial={{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={{opacity:0,scale:.97}} transition={spring}>
        <div className="stop-number" aria-label={`Stop ${index+1}`}>{String(index+1).padStart(2,'0')}</div>
-       <div className="stop-card"><Link href={`/experience/${e.id}`} className="stop-summary"><img src={e.image} alt={e.imageAlt} width={72} height={84} loading="lazy"/><div><span className="eyebrow">{e.category}</span><h3>{e.title}</h3><p><Clock size={12}/>{e.duration} · Tokyo</p></div></Link>
-        <div className="plan-completion"><span>{item.status==='completed'?'✓ COMPLETED':'PLANNED'}</span><Link href={item.status==='completed'?`/passport/tokyo/${e.id}`:`/stamp/${e.id}`}>{item.status==='completed'?'VIEW MEMORY →':'MARK AS COMPLETE →'}</Link></div>
+       <div className="stop-card"><Link href={`/experience/${e.id}`} className="stop-summary"><img src={e.image} alt={e.imageAlt} width={72} height={84} loading="lazy"/><div><span className="eyebrow">{e.category}</span><h3>{e.title}</h3><p><Clock size={12}/>{e.duration} · {cities.find(c=>c.id===e.cityId)?.name}</p></div></Link>
+        <div className="plan-completion"><span>{item.status==='completed'?'✓ COMPLETED':'PLANNED'}</span><Link href={item.status==='completed'?memoryHref(e.cityId,e.id):`/stamp/${e.id}`}>{item.status==='completed'?'VIEW MEMORY →':'MARK AS COMPLETE →'}</Link></div>
         <div className="stop-tools"><label><span className="sr-only">Day for {e.title}</span><select disabled={busy} value={item.day??''} onChange={event=>{const next=event.target.value?Number(event.target.value):null;void update(()=>repository.setItemDay(e.id,next),`${e.title} moved to ${next===null?'Saved':`Day ${next}`}.`);}}><option value="">Saved · no day yet</option>{Array.from({length:plan.dayCount},(_,i)=><option value={i+1} key={i}>Day {String(i+1).padStart(2,'0')}</option>)}</select></label><div>
          <button disabled={busy||index===0} aria-label={`Move ${e.title} earlier`} onClick={()=>void update(()=>repository.moveItem(e.id,-1),'Stop moved earlier.')}><ArrowUp size={16}/></button>
          <button disabled={busy||index===visible.length-1} aria-label={`Move ${e.title} later`} onClick={()=>void update(()=>repository.moveItem(e.id,1),'Stop moved later.')}><ArrowDown size={16}/></button>
@@ -68,7 +71,7 @@ export default function PlanPage(){
      {!visible.length&&<div className="day-empty"><span aria-hidden="true">✳</span><h3>{day===null?'A little possibility pile.':'A blank page. A whole city.'}</h3><p>{day===null?'Save places while exploring, then give them a day.':'Pick your first stop. The best days start somewhere.'}</p>{day!==null&&savedCount>0&&<button onClick={()=>setDay(null)}>Choose from {savedCount} saved {savedCount===1?'place':'places'} <ArrowRight size={16}/></button>}</div>}
     </div>
     <button ref={addButton} className="planner-add" aria-expanded={picker} aria-controls="planner-picker" onClick={()=>setPicker(!picker)}><Plus size={20}/>{day===null?'Find a place to save':'Add an experience'}</button>
-    {picker&&<section id="planner-picker" className="planner-picker" aria-label="Choose Tokyo experiences"><div className="picker-heading"><h3>A LITTLE MORE TOKYO.</h3><button aria-label="Close experience picker" onClick={closePicker}><X size={20}/></button></div><p>Add a stop to {day===null?'your shortlist':`Day ${day}`}.</p>{available.map(e=><div className="picker-place" key={e.id}><img src={e.image} alt="" width={48} height={52}/><div><Link href={`/experience/${e.id}`}>{e.title}</Link><span>{e.category} · {e.duration}</span></div><button disabled={busy} aria-label={`Add ${e.title} to ${day===null?'Saved':`Day ${day}`}`} onClick={()=>void update(()=>repository.addToPlan(e.id,day),`${e.title} added.`,()=>{closePicker();})}><Plus size={19}/></button></div>)}{!available.length&&<p><Check size={16}/> All available Tokyo experiences are in your plan. Use each stop’s day selector to move it.</p>}</section>}
+    {picker&&<section id="planner-picker" className="planner-picker" aria-label="Choose experiences"><div className="picker-heading"><h3>A LITTLE MORE ADVENTURE.</h3><button aria-label="Close experience picker" onClick={closePicker}><X size={20}/></button></div><p>Add a stop to {day===null?'your shortlist':`Day ${day}`}.</p>{available.map(e=><div className="picker-place" key={e.id}><img src={e.image} alt="" width={48} height={52}/><div><Link href={`/experience/${e.id}`}>{e.title}</Link><span>{e.category} · {e.duration}</span></div><button disabled={busy} aria-label={`Add ${e.title} to ${day===null?'Saved':`Day ${day}`}`} onClick={()=>void update(()=>repository.addToPlan(e.id,day),`${e.title} added.`,()=>{closePicker();})}><Plus size={19}/></button></div>)}{!available.length&&<p><Check size={16}/> All available experiences are in your plan. Use each stop’s day selector to move it.</p>}</section>}
     {day===plan.dayCount&&plan.dayCount>1&&<button className="remove-day" disabled={busy} onClick={()=>void update(()=>repository.setDayCount(plan.dayCount-1),'Last day removed. Its stops are in Saved.',()=>{setDay(plan.dayCount-1);setPicker(false);})}>Remove this day · keep its stops in Saved</button>}
     <footer className="planner-footer"><span className="handwritten">More places. More stories.</span><Link href="/city/tokyo">Keep exploring Tokyo <ArrowRight size={17}/></Link></footer>
    </>}
